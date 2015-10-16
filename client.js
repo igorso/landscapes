@@ -59,10 +59,9 @@ var fragphongrender;
 /**
 *  Code to render. 
 */  
-var render_flat_with_normals = function (p, mv) {
-
+var render_flat_normals = function (p, mv) {
    //  Draw normals
-   flatrender.load_vbo (mountain.normalsLines, c_blue, WGL.gl.LINES, 2);
+   flatrender.load_vbo (mountain.normalsLines_f, c_blue, WGL.gl.LINES, 2);
    flatrender.draw (p, mv);
 
    //  Draw tessalate Lines
@@ -72,26 +71,34 @@ var render_flat_with_normals = function (p, mv) {
    //  Draw mountain
    flatrender.load_vbo (mountain.vPosition, c_red, WGL.gl.TRIANGLE_FAN, 4);
    flatrender.draw (p, mv);
-
-
 };
 
-var render_frag_phong = function (p, mv) {
+var render_smooth_normals = function (p, mv) {
+   //  Draw normals
+   flatrender.load_vbo (mountain.normalsLines_s, c_blue, WGL.gl.LINES, 2);
+   flatrender.draw (p, mv);
 
-   // //  Draw normals
-   // fragphongrender.load_vbo (mountain.normalsLines, c_blue, WGL.gl.LINES, 2);
-   // fragphongrender.draw (p, mv);
-
-   // //  Draw tessalate Lines
-   // fragphongrender.load_vbo (mountain.vPosition, c_black, WGL.gl.LINE_LOOP, 4);
-   // fragphongrender.draw (p, mv);
+   //  Draw tessalate Lines
+   flatrender.load_vbo (mountain.vPosition, c_black, WGL.gl.LINE_LOOP, 4);
+   flatrender.draw (p, mv);
    
    //  Draw mountain
-   fragphongrender.load_vbo (mountain.vPosition, mountain.vNormal, WGL.gl.TRIANGLE_FAN, 4,
+   flatrender.load_vbo (mountain.vPosition, c_red, WGL.gl.TRIANGLE_FAN, 4);
+   flatrender.draw (p, mv);
+};
+
+var render_frag_phong_flatnormal = function (p, mv) {   
+   //  Draw mountain
+   fragphongrender.load_vbo (mountain.vPosition, mountain.vNormal_f, WGL.gl.TRIANGLE_FAN, 4,
                              lightPosition, ambientColor, diffuseColor, specularColor, materialShininess);
    fragphongrender.draw (p, mv);
+};
 
-
+var render_frag_phong_smoothnormal = function (p, mv) {   
+   //  Draw mountain
+   fragphongrender.load_vbo (mountain.vPosition, mountain.vNormal_s, WGL.gl.TRIANGLE_FAN, 4,
+                             lightPosition, ambientColor, diffuseColor, specularColor, materialShininess);
+   fragphongrender.draw (p, mv);
 };
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,10 +118,9 @@ window.onload = function init() {
    WGL = new WGL (wglParam, function(){});
 
    //  Queue the render code after WGL initialize
-   WGL.queue_render (render_frag_phong);
+   WGL.queue_render (render_flat_normals);
 
    start();
-   
 
 };
 

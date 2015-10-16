@@ -1,30 +1,31 @@
 var Mountain = function (h, d, nrows, ncolumns) {
-	this.vNormal = [];
-	this.vPosition = [];
-	
-    this.normalsLines = [];
-
-	this.n_vertices = 0;
-	
-	this.normalLines = [];
-	this.H = h;
-	this.origD = d;
-	this.nRows = nrows;
-	this.nColumns = ncolumns;
-	this.iter = 0;
-
-	this.quad_queue = [];
-
-	this.data = [];
-	for( var i = 0; i < this.nRows; ++i ) {
-    	this.data.push( [] );
-    	var x = i/(this.nRows-1.0) - 0.5;
+    this.vNormal_f = [];
+    this.vNormal_s = [];
+    this.vPosition = [];
     
-    	for( var j = 0; j < this.nColumns; ++j ) {
-        	var y = j/(this.nColumns-1.0) - 0.5;
-        	this.data[i][j] = vec3(x, 0.0, y);
-    	}
-	}
+    this.normalsLines_f = [];
+    this.normalsLines_s = [];
+
+    this.n_vertices = 0;
+    
+    this.H = h;
+    this.origD = d;
+    this.nRows = nrows;
+    this.nColumns = ncolumns;
+    this.iter = 0;
+
+    this.quad_queue = [];
+
+    this.data = [];
+    for( var i = 0; i < this.nRows; ++i ) {
+        this.data.push( [] );
+        var x = i/(this.nRows-1.0) - 0.5;
+    
+        for( var j = 0; j < this.nColumns; ++j ) {
+            var y = j/(this.nColumns-1.0) - 0.5;
+            this.data[i][j] = vec3(x, 0.0, y);
+        }
+    }
 
     this.interval_var;
 };
@@ -42,14 +43,17 @@ Mountain.prototype.stop_update_interval = function () {
 
 Mountain.prototype.update_data = function () {    
     this.vPosition = [];
-    this.vNormal = [];
-    this.normalsLines = [];
+    this.vNormal_f = [];
+    this.vNormal_s = [];
+
+    this.normalsLines_f = [];
+    this.normalsLines_s = [];
     
     var quad_node = this.quad_queue.shift();
 
     this.build_iteration(quad_node[0], quad_node[1],
-    					 quad_node[2], quad_node[3],
-    					 quad_node[4]);
+                         quad_node[2], quad_node[3],
+                         quad_node[4]);
 
     // vertex array of nRows*nColumns quadrilaterals 
     // (two triangles/quad) from data
@@ -69,17 +73,16 @@ Mountain.prototype.update_data = function () {
             var p2 = this.data[i+1][j];
             this.vPosition.push( vec4(p2[0], p2[1], p2[2], 1.0));
             
-            
             // Calculate this quads's normal
             var n = cross(subtract(p3, p1), subtract(p2, p1));
             n = scalev(1.0/length(n), n);
 
-            this.vNormal.push(n);
-            this.vNormal.push(n);
-            this.vNormal.push(n);
-            this.vNormal.push(n);
+            this.vNormal_f.push(n);
+            this.vNormal_f.push(n);
+            this.vNormal_f.push(n);
+            this.vNormal_f.push(n);
             
-			this.flat_normals(p1, p2, p3, p4, n);
+            this.flat_normals(p1, p2, p3, p4, n);
 
             this.n_vertices += 4;
         }
@@ -90,8 +93,6 @@ Mountain.prototype.update_data = function () {
     if (this.quad_queue.length === 0) {
             this.stop_update_interval ();
     }
-
-
 
     WGL.render (WGL.scene_render);
 
@@ -128,13 +129,13 @@ Mountain.prototype.flat_normals = function (p1,p2,p3,p4,n) {
     var A = scalev(0.25, addV);
     var B = add(A, scalev(0.05, n));
     
-    this.normalsLines.push(vec4(A[0], A[1], A[2], 1.0));
-    this.normalsLines.push(vec4(B[0], B[1], B[2], 1.0));
+    this.normalsLines_f.push(vec4(A[0], A[1], A[2], 1.0));
+    this.normalsLines_f.push(vec4(B[0], B[1], B[2], 1.0));
 };
 
 Mountain.prototype.smooth_normals = function () {
     
-    this.normalsLines = [];
+    this.normalsLines_s = [];
 
     var quads_per_line = this.nColumns-1;
 
@@ -144,40 +145,38 @@ Mountain.prototype.smooth_normals = function () {
             
             var n = vec3(0.0, 0.0, 0.0);
             
-
-
             var index11 = quads_per_line*i + j;
             var index10 = index11 - 1;//1;
             var index01 = index11 - quads_per_line;//4;
             var index00 = index11 - quads_per_line-1;//5;
 
             if(i == 0 && j == 0) {
-                n = this.vNormal[index11*4];
+                n = this.vNormal_f[index11*4];
             }
             else if(i == 0 && j == this.nColumns-1) {
-                n = this.vNormal[index10*4];
+                n = this.vNormal_f[index10*4];
             }
             else if(i==this.nRows-1 && j == 0) {
-                n = this.vNormal[index01*4];
+                n = this.vNormal_f[index01*4];
             }
             else if(i == this.nRows-1 && j == this.nColumns-1) {
-                n = this.vNormal[index00*4];
+                n = this.vNormal_f[index00*4];
             }
             else if(i == 0) {
-                n = add(this.vNormal[index10*4], this.vNormal[index11*4]);
+                n = add(this.vNormal_f[index10*4], this.vNormal_f[index11*4]);
             }
             else if(i == this.nRows-1) {
-                n = add(this.vNormal[index00*4], this.vNormal[index01*4]);
+                n = add(this.vNormal_f[index00*4], this.vNormal_f[index01*4]);
             }
             else if(j == 0) {
-                n = add(this.vNormal[index01*4], this.vNormal[index11*4]);
+                n = add(this.vNormal_f[index01*4], this.vNormal_f[index11*4]);
             }
             else if(j == this.nColumns-1) {
-                n = add(this.vNormal[index10*4], this.vNormal[index00*4]);
+                n = add(this.vNormal_f[index10*4], this.vNormal_f[index00*4]);
             }
             else {
-                n = add(add(this.vNormal[index00*4], this.vNormal[index01*4]),
-                        add(this.vNormal[index10*4], this.vNormal[index11*4]));
+                n = add(add(this.vNormal_f[index00*4], this.vNormal_f[index01*4]),
+                        add(this.vNormal_f[index10*4], this.vNormal_f[index11*4]));
 
             }
 
@@ -187,21 +186,22 @@ Mountain.prototype.smooth_normals = function () {
 
             // Normal line to be drawn
             var A = this.data[i][j];
-            this.normalsLines.push(vec4(A[0], A[1], A[2], 1.0));
-            var B = add(A, scalev(0.1, n));
-            this.normalsLines.push(vec4(B[0], B[1], B[2], 1.0));
+            var B = add(A, scalev(0.05, n));
+
+            this.normalsLines_s.push(vec4(A[0], A[1], A[2], 1.0));
+            this.normalsLines_s.push(vec4(B[0], B[1], B[2], 1.0));
         }
     }
 
-    this.vNormal = [];
+    this.vNormal_s = [];
 
     for(var i = 0; i < this.nRows-1; ++i) {
         for(var j = 0 ; j < this.nColumns-1; ++j) {
             var id = i*this.nColumns + j;
-            this.vNormal.push(eachVertexNormal[id]);
-            this.vNormal.push(eachVertexNormal[id + 1]);
-            this.vNormal.push(eachVertexNormal[id + this.nColumns + 1]);
-            this.vNormal.push(eachVertexNormal[id + this.nColumns]);
+            this.vNormal_s.push(eachVertexNormal[id]);
+            this.vNormal_s.push(eachVertexNormal[id + 1]);
+            this.vNormal_s.push(eachVertexNormal[id + this.nColumns + 1]);
+            this.vNormal_s.push(eachVertexNormal[id + this.nColumns]);
         }
     }
     eachVertexNormal = [];
