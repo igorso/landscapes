@@ -199,9 +199,9 @@ Mountain.prototype.smooth_normals = function () {
         for(var j = 0 ; j < this.nColumns-1; ++j) {
             var id = i*this.nColumns + j;
             this.vNormal.push(eachVertexNormal[id]);
-            this.vNormal.push(eachVertexNormal[id + this.nColumns]);
-            this.vNormal.push(eachVertexNormal[id + this.nColumns + 1]);
             this.vNormal.push(eachVertexNormal[id + 1]);
+            this.vNormal.push(eachVertexNormal[id + this.nColumns + 1]);
+            this.vNormal.push(eachVertexNormal[id + this.nColumns]);
         }
     }
     eachVertexNormal = [];
