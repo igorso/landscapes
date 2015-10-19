@@ -100,6 +100,34 @@ var render_frag_phong_smoothnormal = function (p, mv) {
                              lightPosition, ambientColor, diffuseColor, specularColor, materialShininess);
    fragphongrender.draw (p, mv);
 };
+
+function input_set_render(e) {
+    var event = e || window.event;
+    var key = event.keyCode;
+   
+   switch (key) {
+      case 49: {
+         WGL.set_single_render (render_smooth_normals);
+         WGL.render (WGL.scene_render);
+      } break;
+      case 50: {
+         WGL.set_single_render (render_frag_phong_smoothnormal);
+         WGL.render (WGL.scene_render);
+      } break;
+
+      case 51: {
+         WGL.set_single_render (render_flat_normals);
+         WGL.render (WGL.scene_render);
+      } break;
+       
+      case 52: {
+         WGL.set_single_render (render_frag_phong_flatnormal);
+         WGL.render (WGL.scene_render);
+      } break;
+   }
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -118,7 +146,10 @@ window.onload = function init() {
    WGL = new WGL (wglParam, function(){});
 
    //  Queue the render code after WGL initialize
-   WGL.queue_render (render_flat_normals);
+   WGL.queue_render (render_smooth_normals);
+
+   //  Listen of input to change the desired render
+   document.addEventListener("keydown", input_set_render);
 
    start();
 

@@ -77,10 +77,10 @@ Mountain.prototype.update_data = function () {
             var n = cross(subtract(p3, p1), subtract(p2, p1));
             n = scalev(1.0/length(n), n);
 
-            this.vNormal_f.push(n);
-            this.vNormal_f.push(n);
-            this.vNormal_f.push(n);
-            this.vNormal_f.push(n);
+            this.vNormal_f.push(vec4(n));
+            this.vNormal_f.push(vec4(n));
+            this.vNormal_f.push(vec4(n));
+            this.vNormal_f.push(vec4(n));
             
             this.flat_normals(p1, p2, p3, p4, n);
 
@@ -95,7 +95,6 @@ Mountain.prototype.update_data = function () {
     }
 
     WGL.render (WGL.scene_render);
-
 };
 
 Mountain.prototype.build_iteration = function (a, b, c, d, iter) {
@@ -182,11 +181,11 @@ Mountain.prototype.smooth_normals = function () {
 
             n = scalev(1.0/length(n), n); 
             // Vertex normal that goes as an attribute to the GPU
-            eachVertexNormal.push(vec4(n));
+            eachVertexNormal.push(n);
 
             // Normal line to be drawn
             var A = this.data[i][j];
-            var B = add(A, scalev(0.05, n));
+            var B = add(A, scalev(0.05, vec3(n[0],n[1],n[2])));
 
             this.normalsLines_s.push(vec4(A[0], A[1], A[2], 1.0));
             this.normalsLines_s.push(vec4(B[0], B[1], B[2], 1.0));

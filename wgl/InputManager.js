@@ -163,16 +163,10 @@ function onMouseUp(e) {
 	}
 }
 
-    /*
-    document.addEventListener("keydown", function(e) {
-        var event = e || window.event;
-        var key = event.keyCode;
-        var moved = false;
-        
-        keyDown(key);
-        translateCamera();
-    } );
 
+
+    
+/*
     document.addEventListener("keyup", function(e) {
         var event = e || window.event;
         var key = event.keyCode;

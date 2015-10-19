@@ -77,6 +77,10 @@ var theZFar = 15000.0;
 /**
 *  Add func to the render queue
 */
+WGL.prototype.set_single_render = function (func) {
+	this.render_code = [];
+	this.render_code.push (func);
+}
 WGL.prototype.queue_render = function (func) {
 	this.render_code.push (func);
 }
